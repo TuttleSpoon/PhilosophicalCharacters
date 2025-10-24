@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>哲学性格診断 | トップページ</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: "Noto Sans JP", sans-serif;
+      background: #f7f8fb;
+      color: #06213D;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    #topContainer {
+      max-width: 720px;
+      margin: 80px auto;
+      padding: 40px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 12px;
+      color: #06213D;
+    }
+    .hero-image {
+      width: 80%;
+      max-width: 500px;
+      margin: 20px auto 30px;
+      display: block;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    p {
+      font-size: 16px;
+      margin-bottom: 24px;
+      color: #333;
+      line-height: 1.6;
+    }
+    button {
+      background: #06213D;
+      color: #fff;
+      font-size: 18px;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    button:hover {
+      background: #0a2f5a;
+    }
+  </style>
+</head>
+<body>
+  <div id="topContainer">
+    <h1>哲学性格診断</h1>
+    <!-- 🔽 ここに画像を追加 -->
+    <img src="images/all.jpg" alt="哲学性格診断のイメージ" class="hero-image">
+    <p>あなたに合う哲学者と、その哲学者が合う人の哲学的性格がわかります。<br>あなたの推し哲学者が見つかるかも！？</p>
+    <button onclick="location.href='quiz.html'">診断をはじめる ▶</button>
+  </div>
+</body>
+</html>

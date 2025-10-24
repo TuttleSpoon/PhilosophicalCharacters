@@ -1,0 +1,531 @@
+/* =========================================
+   共通デザイン：哲学性格診断（index.html / result.html 両対応）
+   ========================================= */
+
+/* ====== ページ全体の基本設定 ====== */
+body {
+  font-family: "Noto Sans JP", sans-serif;
+  background: #f7f8fb;
+  color: #000;
+  margin: 0;
+}
+
+/* ====== メインコンテンツを囲む白いカード ====== */
+#quizContainer {
+  max-width: 720px;
+  margin: 60px auto;
+  padding: 40px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  text-align: center; /* ← ここが中央寄せの原因（あとで打ち消す） */
+}
+
+/* ====== 大見出し ====== */
+h1 {
+  color: #000;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+/* ====== 共通テキスト ====== */
+p {
+  line-height: 1.6;
+  font-size: 16px;
+  color: #000;
+}
+
+/* ====== 質問文 ====== */
+#questionText {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  color: #000;
+}
+
+/* ====== 選択肢ボタン ====== */
+.choice {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  margin: 10px 0;
+  border: 1px solid #e5e7eb;
+  background: #fafafa;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #000;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.02s ease;
+}
+
+.choice:hover {
+  background: #f0f4f8;
+}
+
+.choice.selected {
+  background: #e6f0ff;
+  border-color: #8fb4ff;
+}
+
+/* ====== ボタン操作エリア ====== */
+.controls {
+  margin-top: 22px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+button {
+  background: #06213D;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+button:hover {
+  background: #0a2f5a;
+}
+
+#nextBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   結果ページ専用スタイル
+   ========================================= */
+
+.result-title {
+  font-size: 19px;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.name {
+  font-size: 28px;
+  font-weight: 800;
+  color: #000;
+  margin: 10px 0 22px;
+  letter-spacing: 0.02em;
+}
+
+.img {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 12px;
+  margin: 10px auto 24px;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+  object-fit: cover;
+}
+
+/* ====== 名言（シンプル） ====== */
+blockquote.quote {
+  font-family: "Noto Serif JP", serif;
+  font-size: 20px;
+  font-style: italic;
+  color: #3a2b55;
+  text-align: center;
+  line-height: 1.8;
+  letter-spacing: 0.04em;
+  margin: 28px auto;
+  max-width: 640px;
+  position: relative;
+  padding: 16px 24px;
+}
+
+blockquote.quote::before,
+blockquote.quote::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 1px;
+  background: #b69dd6;
+  margin: 12px auto;
+  opacity: 0.6;
+}
+
+/* ====== 長文テキスト（人物紹介・タイプ） ====== */
+#result p {
+  text-align: left;
+  max-width: 600px;
+  margin: 0 auto 1.2em;
+  line-height: 1.8;
+}
+
+/* ====== セクション見出し ====== */
+#result h3 {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: left;
+  margin: 32px auto 12px;
+  max-width: 600px;
+  padding-left: 10px;
+  border-left: 4px solid transparent;
+}
+
+#result h3:nth-of-type(1) {
+  color: #5e3a87;
+  border-left-color: #b69dd6;
+}
+
+#result h3:nth-of-type(2) {
+  color: #2d6d4b;
+  border-left-color: #8cd4a3;
+}
+
+#result h3:nth-of-type(3) {
+  border-left-color: #8fb4ff;
+  color: #244a99;
+}
+
+/* ====== タイプ見出し ====== */
+.type-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #06213D;
+  margin: 6px 0 12px;
+  letter-spacing: 0.03em;
+}
+
+/* ====== 本リスト（おすすめの本） ====== */
+#result ul {
+  list-style-type: none;   /* ← デフォルトの黒丸を削除 */
+  text-align: left !important;
+  margin: 0 auto 1.5em;
+  padding-left: 1.2em;
+  max-width: 600px;
+}
+
+#result li {
+  line-height: 1.6;
+  margin-bottom: 0.6em;
+}
+
+/* ====== 本リスト（おすすめの本） ====== */
+#result ul {
+  list-style-type: none;     /* 黒点を削除 */
+  text-align: left !important;
+  margin: 0 auto 1.5em;
+  padding-left: 0;           /* 左余白リセット */
+  max-width: 600px;
+}
+
+
+/* ====== 一致度ランキング（アイコンなしにする） ====== */
+.ranking ul li::before {
+  content: none  !important; /* ← 📖 を無効化 */
+}
+
+
+/* ====== 一致度（％）の位置を少し左に寄せる ====== */
+#result .ranking .percent {
+  flex-basis: 70px;      /* ← 幅を少し狭くして左寄せ気味に */
+  text-align: left;      /* ← 中央から左に */
+  font-weight: 700;
+  color: #244a99;
+ /*  margin-right: 10px;*/
+}
+
+
+
+small.note {
+  display: block;
+  color: #888;
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ====== 一致度ランキング ====== */
+.ranking {
+  text-align: left !important;
+  max-width: 600px;
+  margin: 32px auto 0;
+  padding-left: 0;
+}
+
+.ranking h3 {
+  text-align: left !important;
+  font-size: 18px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  color: #333;
+}
+
+.ranking ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+.ranking li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fc;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-bottom: 8px;
+  font-size: 15px;
+  color: #333;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ranking .rank {
+  font-weight: 700;
+  color: #06213D;
+}
+
+.ranking .philosopher {
+  flex: 1;
+  text-align: left;
+  margin-left: 10px;
+}
+
+.ranking .percent {
+  font-weight: 700;
+  color: #244a99;
+}
+
+/* ====== 一致度ランキング（オレンジ系見出し） ====== */
+#result .ranking h3 {
+  color: #c47c1a !important;         /* ← ★ !important で確実に反映 */
+  border-left-color: #f4b23f !important; /* ← 明るいオレンジライン */
+  text-align: left;
+  font-size: 20px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  padding-left: 10px;
+}
+
+
+#result ul,
+.ranking ul {
+  
+  padding-left: 0;
+  margin-left: 0;
+}
+
+/* =========================================
+   アコーディオン（すべての哲学者）一体型カード風デザイン
+   ========================================= */
+
+   .accordion {
+    margin-top: 28px;
+    text-align: center;
+  }
+  
+  /* カード全体 */
+  .accordion-inner {
+    display: inline-block;
+    text-align: left;
+    width: 100%;
+    max-width: 640px;
+    background: #f9fafc;
+    border: 1px solid #dfe3e8;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  /* ボタン */
+  .accordion-btn {
+    display: block;
+    width: 100%;
+    background: #f1f3f8;
+    border: none;
+    border-bottom: 1px solid #dfe3e8;
+    color: #06213D;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: left;
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .accordion-btn:hover {
+    background: #e6ebf3;
+  }
+  
+  /* 開閉コンテンツ（リスト部） */
+  .accordion-content {
+    display: none;
+    padding: 14px 20px 10px;
+    background: #fff;
+  }
+  
+  .accordion-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  /* リスト（哲学者名） */
+  .philosopher-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .philosopher-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eceff2;
+    color: #06213D;
+    font-size: 15px;
+    transition: background 0.2s ease;
+  }
+  
+  .philosopher-list li:last-child {
+    border-bottom: none;
+  }
+  
+  .philosopher-list li:hover {
+    background: #f6f8fc;
+    padding-left: 4px;
+    cursor: pointer;
+  }
+  
+  /* 開閉アニメーション */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  #result ul li::before {
+    content: none;
+  }
+  
+  
+ /* ====== 診断結果のボタン配置を横並びで中央揃えに ====== */
+ #quizContainer .controls {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: nowrap;
+  margin-top: 24px !important;
+  width: 100%;
+}
+
+#quizContainer .controls button {
+  flex: 0 0 auto;                 /* ボタンの幅を固定 */
+  min-width: 180px;               /* 見やすい幅を確保 */
+}
+
+
+/* ====== ボタンが画面端にくっつかないよう余白を追加 ====== */
+#quizContainer > .controls {
+  padding: 0 24px;        /* ← 左右に24pxの余白を確保 */
+  box-sizing: border-box; /* ← paddingを幅に含める */
+}
+
+#quizContainer > .controls button {
+  min-width: 160px;       /* ボタンの最小幅（維持） */
+  padding: 12px 24px;     /* ボタン内側の余白を少し広めに */
+  border-radius: 8px;     /* 見た目を柔らかく */
+}
+
+
+/* ===== 他のリスト（ランキング・アコーディオンなど）では非表示 ===== */
+.ranking ul li::before,
+.philosopher-list li::before {
+  content: none !important;
+}
+
+/* ====== クレジット（制作者） ====== */
+footer.credit {
+  margin-top: 48px;
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  opacity: 0.9;
+  letter-spacing: 0.02em;
+}
+
+footer.credit strong {
+  color: #06213D; /* 深いネイビー */
+  font-weight: 700;
+}
+
+/* ====== クレジット（制作者表記） ====== */
+footer.credit {
+  margin-top: 48px;
+  margin-bottom: 40px;
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  opacity: 0.9;
+  letter-spacing: 0.02em;
+}
+
+/* 名前部分（タットル）を少し大きく・目立たせる */
+footer.credit strong {
+  color: #444;
+  font-weight: 700;
+  font-size: 14px;   /* ← ★ 少し大きくした */
+  line-height: 1;    /* バランス調整 */
+}
+
+/* ====== リンク全体をクリック可能にする ====== */
+.credit-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  gap: 6px;
+  transition: opacity 0.2s ease;
+}
+
+.credit-link:hover {
+  opacity: 0.75;
+}
+
+/* ====== アイコン部分 ====== */
+.credit-icon {
+  width: 28px;  /* ← ちょっと大きめに調整してもバランス良い */
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  vertical-align: middle;
+}
+
+#quizContainer {
+  margin: 40px auto 30px;
+  padding-bottom: 30px;
+}
+
+footer.credit {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+/* ====== おすすめの本リストの位置調整 ====== */
+#result .diagnosis-section ul,
+#philosopher-detail .diagnosis-section ul,
+.diagnosis-section ul {
+  max-width: 600px;
+  margin: 0 auto 1.5em;
+  padding-left: 0;
+  list-style: none;
+  text-align: left;
+}
+
+/* アコーディオンで開いたときも「おすすめの本」の位置を揃える */
+#result ul {
+  max-width: 600px;        /* 診断結果と同じ幅 */
+  margin: 0 auto 1.5em;    /* 中央に配置して余白を合わせる */
+  padding-left: 0;         /* 余白をリセット */
+  list-style: none;        /* 黒点削除 */
+  text-align: left;        /* 左揃え */
+}

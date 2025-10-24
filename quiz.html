@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>哲学性格診断</title>
+  <link rel="stylesheet" href="style.css" /> <!-- 外部CSSを読み込み -->
+</head>
+<body>
+  <!-- ====== 診断全体を囲むコンテナ ====== -->
+  <div id="quizContainer">
+
+    <!-- ページのタイトル -->
+    <h1>哲学性格診断</h1>
+
+    <!-- ====== 質問部分（Q1だけ固定で表示） ====== -->
+    <div id="questionSection">
+
+      <!-- Q1の本文 -->
+      <p id="questionText">Q1. あなたの思考はどこから出発しますか？</p>
+
+      <!-- Q1の選択肢ボタンたち -->
+      <div id="choicesContainer">
+        <!-- data-choice は選択肢番号（JavaScriptで判別用） -->
+        <button data-choice="0" class="choice">
+          世界に問いを立て、対話しながら考える
+        </button>
+        <button data-choice="1" class="choice">
+          疑うことから始める。何も信じないところから
+        </button>
+        <button data-choice="2" class="choice">
+          感覚的な経験から始まる
+        </button>
+        <button data-choice="3" class="choice">
+          根本原理を前提に論理的に構築していく
+        </button>
+        <button data-choice="4" class="choice">
+          言葉を分析し理解すること
+        </button>
+      </div>
+    </div>
+
+    <!-- ====== 次へボタンエリア ====== -->
+    <div class="controls">
+      <!-- 最初は disabled（無効）にしておき、選択後に有効化 -->
+      <button id="nextBtn" disabled>次へ</button>
+    </div>
+  </div>
+
+  <!-- 外部JavaScriptを読み込み（診断の動作を制御） -->
+  <script src="script.js"></script>
+</body>
+</html>

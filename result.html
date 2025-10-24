@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>診断結果 | 哲学性格診断</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="quizContainer">
+    <div class="result-title">あなたに合う哲学者は…</div>
+    <div id="result"></div>
+
+    <div class="controls">
+      <!-- 初期状態では「もう一度診断する」だけ -->
+      <button onclick="location.href='quiz.html'">もう一度診断する</button>
+    </div>
+  </div>
+
+  <!-- ===== データファイル読み込み ===== -->
+  <script src="data/philosophers.js"></script>
+
+  <script>
+    const FORCE_TOP = ""; // テスト用
+    const resultDiv = document.getElementById("result");
+
+    // ===== メイン描画 =====
+    function renderResult() {
+      try {
+        const P = PHILOSOPHERS;
+        document.querySelector(".result-title").style.display = "block"; // タイトル再表示
+
+        // ボタンエリア更新（シェア＋もう一度診断）
+        const controls = document.querySelector(".controls");
+        controls.innerHTML = `
+          <button id="shareBtn">Xでシェアする</button>
+          <button onclick="location.href='quiz.html'">もう一度診断する</button>
+        `;
+
+        // localStorageからスコア取得（テスト用フォールバックあり）
+        let scores = {};
+        try {
+          scores = JSON.parse(localStorage.getItem("quizScores")) || {};
+        } catch {
+          scores = {};
+        }
+        if (Object.keys(scores).length === 0) {
+          scores = { "カント": 120, "アリストテレス": 110, "ニーチェ": 95 };
+        }
+
+        // ===== スコアをソートして上位3名取得（同点時優先順位あり） =====
+        const priorityOrder = [
+          "カント","アリストテレス","ソクラテス・プラトン","デカルト","ニーチェ","サルトル",
+          "ベルクソン","ヒューム","スピノザ","ギリシア懐疑派","ハイデガー","ヴィトゲンシュタイン",
+          "ヘーゲル","ライプニッツ","トマス・アクィナス"
+        ];
+
+        const sorted = Object.entries(scores).sort((a, b) => {
+          const diff = b[1] - a[1];
+          if (diff !== 0) return diff;
+          return priorityOrder.indexOf(a[0]) - priorityOrder.indexOf(b[0]);
+        });
+
+        const topThree = sorted.slice(0, 3);
+        const maxScore = topThree[0] ? topThree[0][1] : 1;
+
+        // ===== ベスト3HTML =====
+        let topThreeHTML = `
+          <div class="ranking">
+            <h3>あなたに合う哲学者ベスト3</h3>
+            <ul>
+              ${topThree
+                .map(([name, score], index) => {
+                  const percent = Math.round((score / maxScore) * 100);
+                  const medal = ["🥇", "🥈", "🥉"][index] || "";
+                  return `
+                    <li>
+                      <span class="rank">${medal}</span>
+                      <span class="philosopher">${name}</span>
+                      <span class="percent">${percent}%</span>
+                    </li>`;
+                })
+                .join("")}
+            </ul>
+          </div>`;
+
+        // ===== アコーディオン =====
+        topThreeHTML += `
+          <div class="accordion">
+            <div class="accordion-inner">
+              <button class="accordion-btn">すべての哲学者を見る ▼</button>
+              <div class="accordion-content">
+                <ul class="philosopher-list">
+                  ${Object.keys(P)
+                    .map(
+                      (name) =>
+                        `<li class="accordion-item" data-name="${name}">${name}</li>`
+                    )
+                    .join("")}
+                </ul>
+              </div>
+            </div>
+          </div>`;
+
+        // ===== メイン哲学者データ =====
+        const topKey = FORCE_TOP || (sorted[0] ? sorted[0][0] : "カント");
+        const p = P[topKey];
+        if (!p) {
+          resultDiv.innerHTML = `<p>「${topKey}」のデータが見つかりません。</p>`;
+          return;
+        }
+
+        // 書籍リストHTML生成（📖マーク付き）
+        const bookListHTML = (p.books || [])
+          .map(
+            (b) =>
+              typeof b === "object"
+                ? `<li class="book-item">📖 ${b.title}${
+                    b.note ? `<small class='note'>${b.note}</small>` : ""
+                  }</li>`
+                : `<li class="book-item">📖 ${b}</li>`
+          )
+          .join("");
+
+        // ===== 結果全体HTML出力 =====
+        resultDiv.innerHTML = `
+          <div class="name">${p.displayName}</div>
+          <img class="img" src="${p.image}" alt="${p.displayName}">
+          <blockquote class="quote">“${p.quote}”</blockquote>
+
+          <div class="diagnosis-section">
+            <h3>人物紹介</h3>
+            <p>${p.description}</p>
+            <h3>あなたのタイプ</h3>
+            <h4 class="type-title">${p.typeTitle}</h4>
+            <p>${p.typeText}</p>
+            <h3>おすすめの本</h3>
+            <ul>${bookListHTML}</ul>
+          </div>
+
+          ${topThreeHTML}
+        `;
+
+        // ===== イベント登録 =====
+        document.querySelector(".accordion-btn").addEventListener("click", (e) => {
+          const content = e.target.nextElementSibling;
+          content.classList.toggle("active");
+          e.target.textContent = content.classList.contains("active")
+            ? "閉じる ▲"
+            : "すべての哲学者を見る ▼";
+        });
+
+        document.querySelectorAll(".accordion-item").forEach((item) => {
+          item.addEventListener("click", () => {
+            const name = item.dataset.name;
+            if (P[name]) renderPhilosopher(name, P);
+          });
+        });
+      } catch (err) {
+        console.error("読み込みエラー:", err);
+        resultDiv.innerHTML = `<p style="color:red;">データを読み込めませんでした: ${err.message}</p>`;
+      }
+    }
+
+    // ===== シェアボタン（X） =====
+    document.addEventListener("click", (e) => {
+      if (e.target.id === "shareBtn") {
+        const philosopher = document.querySelector(".name")?.textContent || "哲学者";
+        const text = `私に合う哲学者は「${philosopher}」でした！🧠✨\n#哲学性格診断 #PhilosophyQuiz`;
+        const url = location.origin + location.pathname;
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+        window.open(twitterUrl, "_blank");
+      }
+    });
+
+    // ===== 別の哲学者をクリックしたときの切り替え =====
+    function renderPhilosopher(name, P) {
+      const p = P[name];
+      if (!p) return;
+
+      const bookListHTML = (p.books || [])
+        .map(b =>
+          typeof b === "object"
+            ? `<li class="book-item">📖 ${b.title}${b.note ? `<br><small class='note'>${b.note}</small>` : ""}</li>`
+            : `<li class="book-item">📖 ${b}</li>`
+        )
+        .join("");
+
+      const accordionHTML = `
+        <div class="accordion">
+          <div class="accordion-inner">
+            <button class="accordion-btn">すべての哲学者を見る ▼</button>
+            <div class="accordion-content">
+              <ul class="philosopher-list">
+                ${Object.keys(P)
+                  .map(name => `<li class="accordion-item">${name}</li>`)
+                  .join("")}
+              </ul>
+            </div>
+          </div>
+        </div>`;
+
+      document.querySelector(".result-title").style.display = "none";
+
+      // ===== 「あなたのタイプ」→「哲学的性格」に変更 =====
+      resultDiv.innerHTML = `
+        <div class="name">${p.displayName}</div>
+        <img class="img" src="${p.image}" alt="${p.displayName}">
+        <blockquote class="quote">“${p.quote}”</blockquote>
+        <h3>人物紹介</h3>
+        <p>${p.description}</p>
+        <h3>哲学的性格</h3>  <!-- ← ここを切り替え -->
+        <h4 class="type-title">${p.typeTitle}</h4>
+        <p>${p.typeText}</p>
+        <h3>おすすめの本</h3>
+        <ul>${bookListHTML}</ul>
+        ${accordionHTML}
+      `;
+
+      const controls = document.querySelector(".controls");
+      controls.innerHTML = `
+        <button onclick="renderResult()">診断結果に戻る</button>
+       <button onclick="location.href='quiz.html'">もう一度診断する</button>
+      `;
+
+      const accordionBtn = document.querySelector(".accordion-btn");
+      accordionBtn.addEventListener("click", (e) => {
+        const content = e.target.nextElementSibling;
+        content.classList.toggle("active");
+        e.target.textContent = content.classList.contains("active")
+          ? "閉じる ▲"
+          : "すべての哲学者を見る ▼";
+      });
+
+      document.querySelectorAll(".accordion-item").forEach(item => {
+        item.addEventListener("click", () => {
+          const name = item.textContent.trim();
+          if (P[name]) renderPhilosopher(name, P);
+        });
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    renderResult();
+  </script>
+
+  <!-- ===== フッタークレジット ===== -->
+  <footer class="credit">
+    この診断を作ったひとは
+    <a href="https://x.com/tuttle_spoon?s=21&t=xzsJDzYWmXj9INURNIm5vQ" target="_blank" rel="noopener noreferrer" class="credit-link">
+      <strong>タットル</strong>
+      <img src="images/tuttle_icon.jpg" alt="タットル" class="credit-icon">
+    </a>
+  </footer>
+
+  <script type="module">
+    // Firebase SDKをインポート
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+    import { getDatabase, ref, onValue, runTransaction, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+  
+    // Firebase設定
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwwjCX_-EHPusTrmRQIdAAgv8Z1yf81Wc",
+      authDomain: "philosophy-quiz-783ca.firebaseapp.com",
+      databaseURL: "https://philosophy-quiz-783ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "philosophy-quiz-783ca",
+      storageBucket: "philosophy-quiz-783ca.firebasestorage.app",
+      messagingSenderId: "582830530333",
+      appId: "1:582830530333:web:ea492642c2d3b798568bf4",
+      measurementId: "G-5MJ4040RQM"
+    };
+  
+    // Firebase初期化
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const counterRef = ref(db, "counter");
+  
+    // 🟢 ここがポイント！
+    // 「counter」が存在しない場合のみ0を設定（初期化）
+    get(counterRef).then((snapshot) => {
+      if (!snapshot.exists()) {
+        runTransaction(counterRef, () => 0);
+      }
+    });
+  
+    // 🟢 ページ初回アクセス時のみカウントアップ
+    if (!sessionStorage.getItem("visited")) {
+      runTransaction(counterRef, (currentValue) => (currentValue || 0) + 1);
+      sessionStorage.setItem("visited", "true");
+    }
+  
+    // 🟢 カウンター要素を追加
+    window.addEventListener("DOMContentLoaded", () => {
+      const container = document.getElementById("quizContainer");
+      if (!container) {
+        console.error("❌ quizContainer が見つかりません。HTML側に <div id='quizContainer'></div> を追加してください。");
+        return;
+      }
+  
+      const counterDiv = document.createElement("div");
+      counterDiv.className = "counter-container";
+      counterDiv.style = "text-align: center; margin-top: 24px;";
+      counterDiv.innerHTML = `<p>📌 この診断を受けたひとは <span id="counter">0</span> 人です！</p>`;
+      container.appendChild(counterDiv);
+  
+      // 🟢 Realtime Databaseの値をリアルタイム反映
+      onValue(counterRef, (snapshot) => {
+        const count = snapshot.val();
+        document.getElementById("counter").textContent = count ?? 0;
+      });
+    });
+  </script>  
+
+</body>
+</html>
