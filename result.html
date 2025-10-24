@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -21,6 +22,25 @@
   <script src="data/philosophers.js"></script>
 
   <script>
+    // 日本語名 → 短縮キー の対応表
+    const nameMap = {
+      "ヴィトゲンシュタイン": "vit",
+      "ギリシア懐疑派": "ske",
+      "ヒューム": "hum",
+      "ニーチェ": "nie",
+      "カント": "kan",
+      "アリストテレス": "ari",
+      "ソクラテス・プラトン": "pla",
+      "デカルト": "dec",
+      "スピノザ": "spi",
+      "ライプニッツ": "lei",
+      "ヘーゲル": "heg",
+      "アクィナス": "aqu",
+      "サルトル": "sar",
+      "ハイデガー": "hei",
+      "ベルクソン": "ber"
+    };
+
     const FORCE_TOP = ""; // テスト用
     const resultDiv = document.getElementById("result");
 
@@ -47,13 +67,40 @@
           `;
         }
 
-        // localStorageからスコア取得（テスト用フォールバックあり）
+        // ===== URLパラメータからスコアを復元（URLを最優先） =====
+
+        // nameMap を逆引きできるように変換（短縮キー → 日本語名）
+        const shortMap = Object.fromEntries(
+          Object.entries(nameMap).map(([jp, short]) => [short, jp])
+        );
+
         let scores = {};
-        try {
-          scores = JSON.parse(localStorage.getItem("quizScores")) || {};
-        } catch {
-          scores = {};
+        const params = new URLSearchParams(window.location.search);
+
+        // 1️⃣ URLにスコアがあれば常にそれを最優先して使用（vit=80形式でも日本語キーでもOK）
+        params.forEach((value, key) => {
+          if (shortMap[key]) {
+            // 短縮キー → 日本語に変換
+            scores[shortMap[key]] = Number(value);
+          } else if (Object.keys(nameMap).includes(key)) {
+            // 日本語キー（互換用）
+            scores[key] = Number(value);
+          }
+        });
+
+        // 2️⃣ URLにスコアが入っていれば localStorage を上書き
+        if (Object.keys(scores).length > 0) {
+          localStorage.setItem("quizScores", JSON.stringify(scores));
+        } else {
+          // 3️⃣ URLにスコアがない場合だけ localStorage から取得
+          try {
+            scores = JSON.parse(localStorage.getItem("quizScores")) || {};
+          } catch {
+            scores = {};
+          }
         }
+
+        // 4️⃣ それでも空ならフォールバック（テスト用）
         if (Object.keys(scores).length === 0) {
           scores = { "カント": 120, "アリストテレス": 110, "ニーチェ": 95 };
         }
@@ -173,14 +220,35 @@
     }
 
     // ===== シェアボタン（X） =====
-    document.addEventListener("click", (e) => {
+    document.addEventListener("click", async (e) => {
       if (e.target.id === "shareBtn") {
         const philosopher = document.querySelector(".name")?.textContent || "哲学者";
-        const text = `私に合う哲学者は「${philosopher}」でした！🧠✨\n#哲学性格診断 #PhilosophyQuiz`;
+        const text = `私に合う哲学者は「${philosopher}」でした！📖\n#哲学性格診断　#PhilosophicalCharacters\n診断結果の詳細はこちら👇\n`;
+
         // 現在のURL（スコア付き）＋ from=x を付与
-        const url = location.href + "&from=x";
-        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-        window.open(twitterUrl, "_blank");
+        const longUrl = location.href + "&from=x";
+
+        try {
+          // ✅ is.gd のAPIで短縮URLを作成
+          const response = await fetch(
+            `https://is.gd/create.php?format=simple&url=${encodeURIComponent(longUrl)}`
+          );
+          const shortUrl = await response.text();
+
+          // ✅ 短縮URLを使ってシェア
+          const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+            text
+          )}&url=${encodeURIComponent(shortUrl)}`;
+          window.open(twitterUrl, "_blank");
+        } catch (error) {
+          console.error("URL短縮に失敗しました:", error);
+
+          // 万一失敗したら元の長いURLでシェア
+          const fallbackUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+            text
+          )}&url=${encodeURIComponent(longUrl)}`;
+          window.open(fallbackUrl, "_blank");
+        }
       }
     });
 
