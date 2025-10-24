@@ -219,38 +219,49 @@
       }
     }
 
-    // ===== シェアボタン（X） =====
-    document.addEventListener("click", async (e) => {
-      if (e.target.id === "shareBtn") {
-        const philosopher = document.querySelector(".name")?.textContent || "哲学者";
-        const text = `私に合う哲学者は「${philosopher}」でした！📖\n#哲学性格診断　#PhilosophicalCharacters\n診断結果の詳細はこちら👇\n`;
+    // ===== シェアボタン（X）を確実に動作させる =====
+      setTimeout(() => {
+        const shareBtn = document.getElementById("shareBtn");
+        if (!shareBtn) return;
 
-        // 現在のURL（スコア付き）＋ from=x を付与
-        const longUrl = location.href + "&from=x";
+        shareBtn.addEventListener("click", async () => {
+          const philosopher = document.querySelector(".name")?.textContent || "哲学者";
+          const text = `私に合う哲学者は「${philosopher}」でした！📖
+      #哲学性格診断　#PhilosophicalCharacters
+      診断結果の詳細はこちら👇
+      `;
 
-        try {
-          // ✅ is.gd のAPIで短縮URLを作成
-          const response = await fetch(
-            `https://is.gd/create.php?format=simple&url=${encodeURIComponent(longUrl)}`
-          );
-          const shortUrl = await response.text();
+          const url = new URL(location.href);
+          if (!url.searchParams.has("from")) url.searchParams.set("from", "x");
+          const longUrl = url.toString();
 
-          // ✅ 短縮URLを使ってシェア
-          const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-            text
-          )}&url=${encodeURIComponent(shortUrl)}`;
-          window.open(twitterUrl, "_blank");
-        } catch (error) {
-          console.error("URL短縮に失敗しました:", error);
+          // 1️⃣ スマホ共有（Web Share API）が使える場合
+          if (navigator.share) {
+            try {
+              await navigator.share({ text, url: longUrl });
+              return;
+            } catch (e) {}
+          }
 
-          // 万一失敗したら元の長いURLでシェア
-          const fallbackUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-            text
-          )}&url=${encodeURIComponent(longUrl)}`;
-          window.open(fallbackUrl, "_blank");
-        }
-      }
-    });
+          // 2️⃣ 通常のTwitter共有
+          const base = "https://twitter.com/intent/tweet";
+          const intentWithLong = `${base}?text=${encodeURIComponent(text)}&url=${encodeURIComponent(longUrl)}`;
+
+          // クリック直後にすぐ開く（ブロック防止）
+          const win = window.open(intentWithLong, "_blank");
+
+          // バックグラウンドで短縮URLを取得して差し替え
+          try {
+            const resp = await fetch(`https://is.gd/create.php?format=simple&url=${encodeURIComponent(longUrl)}`);
+            const shortUrl = (await resp.text()).trim();
+            if (shortUrl && win && !win.closed) {
+              const intentWithShort = `${base}?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shortUrl)}`;
+              win.location.href = intentWithShort;
+            }
+          } catch {}
+        });
+      }, 200);
+
 
     // ===== 別の哲学者をクリックしたときの切り替え =====
     function renderPhilosopher(name, P) {
