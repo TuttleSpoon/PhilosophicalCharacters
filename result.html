@@ -30,12 +30,22 @@
         const P = PHILOSOPHERS;
         document.querySelector(".result-title").style.display = "block"; // タイトル再表示
 
-        // ボタンエリア更新（シェア＋もう一度診断）
         const controls = document.querySelector(".controls");
-        controls.innerHTML = `
-          <button id="shareBtn">Xでシェアする</button>
-          <button onclick="location.href='quiz.html'">もう一度診断する</button>
-        `;
+
+        // ✅ URLに「from=x」が付いているか判定
+        if (location.search.includes("from=x")) {
+          // 共有URLで開いた時 → 「Xでシェアする」＋「診断TOPへ」
+          controls.innerHTML = `
+            <button id="shareBtn">Xでシェアする</button>
+            <button onclick="location.href='index.html'">診断TOPへ</button>
+          `;
+        } else {
+          // 通常時 → 「Xでシェアする」＋「もう一度診断する」
+          controls.innerHTML = `
+            <button id="shareBtn">Xでシェアする</button>
+            <button onclick="location.href='quiz.html'">もう一度診断する</button>
+          `;
+        }
 
         // localStorageからスコア取得（テスト用フォールバックあり）
         let scores = {};
@@ -167,7 +177,8 @@
       if (e.target.id === "shareBtn") {
         const philosopher = document.querySelector(".name")?.textContent || "哲学者";
         const text = `私に合う哲学者は「${philosopher}」でした！🧠✨\n#哲学性格診断 #PhilosophyQuiz`;
-        const url = location.origin + location.pathname;
+        // 現在のURL（スコア付き）＋ from=x を付与
+        const url = location.href + "&from=x";
         const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
         window.open(twitterUrl, "_blank");
       }
