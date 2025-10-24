@@ -529,3 +529,15 @@ footer.credit {
   list-style: none;        /* 黒点削除 */
   text-align: left;        /* 左揃え */
 }
+
+/* ====== Xでシェアするボタンのタップ安定化 ====== */
+#shareBtn {
+  position: relative;     /* z-indexを有効にするために必要 */
+  z-index: 9999;          /* 最前面に出してタップをブロックされないようにする */
+  pointer-events: auto;   /* 親要素がpointer-events:noneでもタップを通す */
+}
+
+.controls {
+  position: relative;     /* controls自体のレイヤーを確保 */
+  z-index: 10;            /* 他の要素より上に出す */
+}
