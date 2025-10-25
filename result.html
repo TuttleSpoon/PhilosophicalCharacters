@@ -392,6 +392,9 @@
   
     // 🟢 カウンター要素を追加
     window.addEventListener("DOMContentLoaded", () => {
+        // ✅ 二重生成防止
+        if (document.querySelector(".counter-container")) return;
+
       const container = document.getElementById("quizContainer");
       if (!container) {
         console.error("❌ quizContainer が見つかりません。HTML側に <div id='quizContainer'></div> を追加してください。");
@@ -401,7 +404,10 @@
       const counterDiv = document.createElement("div");
       counterDiv.className = "counter-container";
       counterDiv.style = "text-align: center; margin-top: 24px;";
-      counterDiv.innerHTML = `<p>📌 この診断を受けたひとは <span id="counter">0</span> 人です！</p>`;
+      counterDiv.innerHTML = `
+      <p>📌 この診断を受けたひとは…<br>
+      <strong><span id="counter">0</span>人</strong>です！</p>`;
+
       container.appendChild(counterDiv);
   
       // 🟢 Realtime Databaseの値をリアルタイム反映
